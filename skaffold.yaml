@@ -1,0 +1,22 @@
+apiVersion: skaffold/v1alpha5
+kind: Config
+build:
+  artifacts:
+    - image: gcr.io/hidekuro-sandbox/drupod
+      context: .
+  tagPolicy:
+    sha256: {}
+deploy:
+  helm:
+    releases:
+      - name: drupod
+        chartPath: k8s-helm/drupod
+        imageStrategy:
+          helm: {}
+        valuesFiles:
+          - k8s-helm/drupod/values.yaml
+        values:
+          image: gcr.io/hidekuro-sandbox/drupod
+        setValueTemplates:
+          developMode: "{{ .DEVELOP_MODE }}"
+          drupal.db.password: "{{ .DRUPAL_DB_PASSWORD }}"

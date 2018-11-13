@@ -1,0 +1,3 @@
+Ready to access drupod:
+
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .Values.appDomain }}{{ $.Values.ingress.path }}

@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "drupod.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "drupod.name" . }}
+    helm.sh/chart: {{ include "drupod.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "drupod.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "drupod.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: drupal-data
+          persistentVolumeClaim:
+            claimName: "{{ .Release.Name }}-drupal-pvc"
+        - name: nginx-conf
+          configMap:
+            name: "{{ .Release.Name }}-nginx-conf"
+      initContainers:
+        # copy assets and default setting files from image to volume.
+        - name: init-drupal-data
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "cp -r -u /var/www/html/* /tmp/drupal/; chown -R www-data:www-data /tmp/drupal"]
+          volumeMounts:
+            - name: drupal-data
+              mountPath: /tmp/drupal
+      containers:
+        - name: "nginx"
+          image: nginx:stable-alpine
+          imagePullPolicy: IfNotPresent
+          # substitute vars in drupal.conf
+          command: ["sh", "-c", "envsubst '$SERVER_NAME $PHP_FPM_HOST' < /tmp/nginx-conf/drupal.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+          volumeMounts:
+            - name: drupal-data
+              mountPath: /var/www/html
+            - name: nginx-conf
+              mountPath: /tmp/nginx-conf
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: SERVER_NAME
+              value: {{ .Values.appDomain | quote }}
+            - name: PHP_FPM_HOST
+              value: "localhost"
+          livenessProbe:
+            httpGet:
+              path: /.health
+              port: http
+            initialDelaySeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /.health
+              port: http
+            initialDelaySeconds: 60
+          resources:
+            requests:
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+        - name: "drupal"
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: drupal-data
+              mountPath: /var/www/html/sites
+              subPath: sites
+          env:
+            - name: DRUPAL_DB_HOST
+            {{- if .Values.developMode }}
+              value: "{{ .Release.Name }}-{{ .Values.mariadb.fullnameOverride }}"
+            {{- else }}
+              value: {{ .Values.drupal.db.externalHost | quote }}
+            {{- end }}
+            - name: DRUPAL_DB_PORT
+              value: "3306"
+            - name: DRUPAL_DB_NAME
+              value: {{ .Values.drupal.db.name | quote }}
+            - name: DRUPAL_DB_USERNAME
+              value: {{ .Values.drupal.db.userName | quote }}
+            - name: DRUPAL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: drupal-secrets
+                  key: drupalDatabasePassword
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 30
+          resources:
+            requests:
+              memory: 1Gi
+            limits:
+              memory: 1.5Gi
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

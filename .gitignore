@@ -1,0 +1,56 @@
+/.env
+/initdb.d/*
+!/initdb.d/.gitkeep
+
+# ref: https://www.gitignore.io/api/drupal8,composer
+
+### Composer ###
+/drupal/composer.phar
+/drupal/vendor/
+
+### Drupal8 ###
+# Ignore configuration files that may contain sensitive information
+/drupal/sites/*/*settings*.php
+/drupal/sites/*/*services*.yml
+
+# Keep default settings
+!/drupal/sites/default/default.services.yml
+!/drupal/sites/default/default.settings.php
+
+# Ignore paths that may contain user-generated content
+/drupal/sites/*/files
+/drupal/sites/*/public
+/drupal/sites/*/private
+/drupal/sites/*/files-public
+/drupal/sites/*/files-private
+
+# Ignore paths that may contain temporary files
+/drupal/sites/*/translations
+/drupal/sites/*/tmp
+/drupal/sites/*/cache
+
+# Ignore drupal core (if not versioning drupal sources)
+/drupal/core
+/drupal/modules/README.txt
+/drupal/profiles/README.txt
+/drupal/sites/README.txt
+/drupal/sites/example.sites.php
+/drupal/sites/example.settings.local.php
+/drupal/sites/development.services.yml
+/drupal/themes/README.txt
+/drupal/.csslintrc
+/drupal/.editorconfig
+/drupal/.eslintignore
+/drupal/.eslintrc.json
+/drupal/.gitattributes
+/drupal/.ht.router.php
+/drupal/.htaccess
+/drupal/autoload.php
+/drupal/example.gitignore
+/drupal/index.php
+/drupal/LICENSE.txt
+/drupal/README.txt
+/drupal/INSTALL.txt
+/drupal/robots.txt
+/drupal/update.php
+/drupal/web.config

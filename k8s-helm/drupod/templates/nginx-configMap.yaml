@@ -1,0 +1,12 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: "{{ .Release.Name }}-nginx-conf"
+  namespace: default
+  labels:
+    name: "{{ .Release.Name }}-nginx-conf"
+    app.kubernetes.io/name: {{ include "drupod.name" . }}
+    helm.sh/chart: {{ include "drupod.chart" . }}
+data:
+  drupal.conf: |-
+{{ .Files.Get "files/nginx/conf.d/drupal.conf" | indent 4 }}

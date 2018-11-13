@@ -1,0 +1,20 @@
+{{- if .Values.developMode -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ .Release.Name }}-drupal-pv"
+  labels:
+    name: "{{ .Release.Name }}-drupal-pv"
+    app.kubernetes.io/name: {{ include "drupod.name" . }}
+    helm.sh/chart: {{ include "drupod.chart" . }}
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    type: DirectoryOrCreate
+    path: /data/drupal
+{{ end }}
