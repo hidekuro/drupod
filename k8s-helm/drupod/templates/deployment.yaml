@@ -85,7 +85,7 @@ spec:
               value: {{ .Values.drupal.db.externalHost | quote }}
             {{- end }}
             - name: DRUPAL_DB_PORT
-              value: "3306"
+              value: {{ .Values.drupal.db.port | quote }}
             - name: DRUPAL_DB_NAME
               value: {{ .Values.drupal.db.name | quote }}
             - name: DRUPAL_DB_USERNAME

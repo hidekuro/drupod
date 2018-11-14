@@ -31,24 +31,31 @@ drupal:
     userName: "drupal"
     password: ""
     externalHost:
+    port: "3306"
 
 # values for stable/mariadb https://github.com/helm/charts/tree/master/stable/mariadb
 mariadb:
-  nameOverride: "local-mariadb"
-  fullnameOverride: "local-mariadb"
+  nameOverride: "mariadb"
+  fullnameOverride: "mariadb"
   db:
     name: "drupal"
     user: "drupal"
     password: "drupal"
     forcePassword: true
+  service:
+    port: "3306"
   rootUser:
     password: "root"
     forcePassword: true
   replication:
     enabled: false
-  # put my.cnf as yaml flow-string in master.config if you need custom my.cnf
-  # master:
-  #   config: |
+  master:
+    persistence:
+      enabled: true
+    # config: |-
+    #
+    #   put my.cnf as yaml flow-string in master.config if you need custom my.cnf
+    #
 
 ingress:
   enabled: true

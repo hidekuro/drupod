@@ -13,6 +13,3 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  selector:
-    matchLabels:
-      name: "{{ .Release.Name }}-drupal-pv"

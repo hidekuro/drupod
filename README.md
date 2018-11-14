@@ -43,7 +43,7 @@ eval $(minikube docker-env)
 docker-compose up --build -d
 ```
 
-and access http://localhost:10080/ .
+and access `http://$(minikube ip):10080/`
 
 # Testing deploy to local cluster
 
@@ -52,6 +52,8 @@ Modify your `hosts` to resolve domain `drupod.minikube.internal` to IP shown by 
 After that, do `skaffold run` or `skaffold dev`.
 
 ```bash
+eval $(minikube docker-env)
+
 # watch mode
 skaffold dev
 
@@ -60,6 +62,8 @@ skaffold run
 ```
 
 and access http://drupod.minikube.internal/
+
+- Require edit dns resolver (`/etc/hosts` or DNS Entry) to `drupod.minikube.internal` resolve to your `minikube ip`.
 
 # Every morning tasks
 
